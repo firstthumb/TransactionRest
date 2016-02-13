@@ -1,6 +1,7 @@
 package com.ekocaman.demo.advice;
 
 import com.ekocaman.demo.exc.InvalidParameterException;
+import com.ekocaman.demo.exc.TransactionNotFoundException;
 import com.ekocaman.demo.response.ImmutableStatusResponse;
 import com.ekocaman.demo.response.StatusResponse;
 import com.google.common.base.Throwables;
@@ -19,6 +20,18 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHandler {
     private static Logger LOG = LoggerFactory.getLogger(ExceptionHandlerControllerAdvice.class);
 
+    @ExceptionHandler(TransactionNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<Object> handleTransactionNotFoundException(Exception e) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        StatusResponse errorResponse = ImmutableStatusResponse.builder().status("error").build();
+        LOG.error("Transaction not found ==> ", e);
+
+        return new ResponseEntity<Object>(errorResponse, headers, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(InvalidParameterException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ResponseEntity<Object> handleInvalidParameterException(Exception e) {
@@ -26,8 +39,7 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         StatusResponse errorResponse = ImmutableStatusResponse.builder().status("error").build();
-        LOG.error("Internal Server Error ==> ", e);
-        LOG.error("Exception details : {}", Throwables.getStackTraceAsString(e));
+        LOG.error("Invalid parameter ==> ", e);
 
         return new ResponseEntity<Object>(errorResponse, headers, HttpStatus.UNPROCESSABLE_ENTITY);
     }
@@ -39,8 +51,7 @@ public class ExceptionHandlerControllerAdvice extends ResponseEntityExceptionHan
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         StatusResponse errorResponse = ImmutableStatusResponse.builder().status("error").build();
-        LOG.error("Internal Server Error ==> ", e);
-        LOG.error("Exception details : {}", Throwables.getStackTraceAsString(e));
+        LOG.error("Illegal state ==> ", e);
 
         return new ResponseEntity<Object>(errorResponse, headers, HttpStatus.UNPROCESSABLE_ENTITY);
     }

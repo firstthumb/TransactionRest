@@ -1,5 +1,6 @@
 package com.ekocaman.demo.service;
 
+import com.ekocaman.demo.exc.TransactionNotFoundException;
 import com.ekocaman.demo.model.Transaction;
 import com.ekocaman.demo.repository.TransactionDao;
 import org.slf4j.Logger;
@@ -41,6 +42,10 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction transaction = transactionDao.findTransactionById(transactionId);
         LOG.info("Transaction found : {}", transaction);
+
+        if (transaction == null) {
+            throw new TransactionNotFoundException("Transaction with Id : " + transactionId + " could not be found");
+        }
 
         return transaction;
     }

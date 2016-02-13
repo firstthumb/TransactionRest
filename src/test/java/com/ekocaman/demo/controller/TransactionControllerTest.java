@@ -5,6 +5,8 @@ import com.ekocaman.demo.model.Transaction;
 import com.ekocaman.demo.repository.TransactionDao;
 import com.ekocaman.demo.request.ImmutableTransactionRequest;
 import com.ekocaman.demo.request.TransactionRequest;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.After;
 import org.junit.Before;
@@ -19,7 +21,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
@@ -176,6 +182,9 @@ public class TransactionControllerTest {
 
     //endregion
 
+
+    //region TRANSACTION BY TYPE
+
     @Test
     public void getTransactionByTypeSuccessfully() throws Exception {
         for (long i = 1; i <= 10; i++) {
@@ -201,6 +210,27 @@ public class TransactionControllerTest {
 
         transactionDao.clear();
     }
+
+    @Test
+    public void getTransactionByTypeNoResultSuccessfully() throws Exception {
+        String type = "unknown-type";
+        String url = String.format("/transactionservice/types/%s", type);
+
+        String response = mvc.perform(get(url)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").value(is(emptyIterable())))
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(response, is(notNullValue()));
+
+        transactionDao.clear();
+    }
+
+    //endregion
+
+    //region TRANSACTION BY ID
 
     @Test
     public void getTransactionByIdSuccessfully() throws Exception {
@@ -229,6 +259,26 @@ public class TransactionControllerTest {
 
         transactionDao.clear();
     }
+
+    @Test
+    public void getTransactionByIdNonExistingFail() throws Exception {
+        Long transactionId = Long.MAX_VALUE;
+        String url = String.format("/transactionservice/transaction/%s", transactionId);
+
+        String response = mvc.perform(get(url)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.status").value(is("error")))
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(response, is(notNullValue()));
+
+        transactionDao.clear();
+    }
+
+    //endregion
+
+    //region SUM OF TRANSACTION
 
     @Test
     public void getSumOfTransactionByParentIdSuccessfully() throws Exception {
@@ -260,4 +310,41 @@ public class TransactionControllerTest {
 
         transactionDao.clear();
     }
+
+    @Test
+    public void getSumOfTransactionByParentIdDoublePrecisionSuccessfully() throws Exception {
+        {
+            Transaction transaction = Transaction.builder()
+                    .transactionId(1L)
+                    .amount(0.6)
+                    .type("cars")
+                    .build();
+            transactionDao.saveTransaction(transaction);
+        }
+
+        {
+            Transaction transaction = Transaction.builder()
+                    .transactionId(2L)
+                    .amount(0.3)
+                    .type("cars")
+                    .parentId(1L)
+                    .build();
+            transactionDao.saveTransaction(transaction);
+        }
+
+        Long parentId = 1L;
+        String url = String.format("/transactionservice/sum/%s", parentId);
+
+        String response = mvc.perform(get(url)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sum").value(is(0.9)))
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(response, is(notNullValue()));
+
+        transactionDao.clear();
+    }
+
+    //endregion
 }

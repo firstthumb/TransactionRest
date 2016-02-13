@@ -1,6 +1,7 @@
 package com.ekocaman.demo.service;
 
 import com.ekocaman.demo.config.AppConfig;
+import com.ekocaman.demo.exc.TransactionNotFoundException;
 import com.ekocaman.demo.model.Transaction;
 import com.ekocaman.demo.repository.TransactionDao;
 import org.junit.After;
@@ -216,11 +217,9 @@ public class TransactionServiceTest {
         transactionService.findByTransactionId(null);
     }
 
-    @Test
-    public void findTransactionByIdAndReturnsNullSuccessfully() {
-        Transaction noTransaction = transactionService.findByTransactionId(Long.MAX_VALUE);
-
-        assertThat(noTransaction, is(nullValue()));
+    @Test(expected = TransactionNotFoundException.class)
+    public void findTransactionByIdNonExistingFail() {
+        transactionService.findByTransactionId(Long.MAX_VALUE);
     }
 
     //endregion
