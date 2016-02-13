@@ -1,6 +1,7 @@
 package com.ekocaman.demo.controller;
 
 import com.ekocaman.demo.config.AppConfig;
+import com.ekocaman.demo.model.Transaction;
 import com.ekocaman.demo.repository.TransactionDao;
 import com.ekocaman.demo.request.ImmutableTransactionRequest;
 import com.ekocaman.demo.request.TransactionRequest;
@@ -21,6 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -69,5 +71,90 @@ public class TransactionControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         assertThat(response, is(notNullValue()));
+    }
+
+    @Test
+    public void getTransactionByTypeSuccessfully() throws Exception {
+        for (long i = 1; i <= 10; i++) {
+            Transaction transaction = Transaction.builder()
+                    .transactionId(i)
+                    .amount(10D)
+                    .type("cars")
+                    .build();
+
+            transactionDao.saveTransaction(transaction);
+        }
+
+        String type = "cars";
+        String url = String.format("/transactionservice/types/%s", type);
+
+        String response = mvc.perform(get(url)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(response, is(notNullValue()));
+
+        transactionDao.clear();
+    }
+
+    @Test
+    public void getTransactionByIdSuccessfully() throws Exception {
+        for (long i = 1; i <= 10; i++) {
+            Transaction transaction = Transaction.builder()
+                    .transactionId(i)
+                    .amount(i * 2D)
+                    .type("cars")
+                    .build();
+
+            transactionDao.saveTransaction(transaction);
+        }
+
+        Long transactionId = 5L;
+        String url = String.format("/transactionservice/transaction/%s", transactionId);
+
+        String response = mvc.perform(get(url)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.amount").value(is(10D)))
+                .andExpect(jsonPath("$.type").value(is("cars")))
+                .andExpect(jsonPath("$.parent_id").doesNotExist())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(response, is(notNullValue()));
+
+        transactionDao.clear();
+    }
+
+    @Test
+    public void getSumOfTransactionByParentIdSuccessfully() throws Exception {
+        for (long i = 1; i <= 10; i++) {
+            Transaction.TransactionBuilder builder = Transaction.builder()
+                    .transactionId(i)
+                    .amount(i * 2D)
+                    .type("cars");
+
+            if (i > 1) {
+                builder.parentId(i - 1);
+            }
+
+            Transaction transaction = builder.build();
+
+            transactionDao.saveTransaction(transaction);
+        }
+
+        Long parentId = 5L;
+        String url = String.format("/transactionservice/sum/%s", parentId);
+
+        String response = mvc.perform(get(url)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sum").value(is(90D)))
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(response, is(notNullValue()));
+
+        transactionDao.clear();
     }
 }

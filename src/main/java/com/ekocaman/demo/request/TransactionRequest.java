@@ -17,4 +17,12 @@ public abstract class TransactionRequest {
     public abstract String getType();
 
     public abstract Optional<Long> getParentId();
+
+    public static ImmutableTransactionRequest withTransaction(Transaction transaction) {
+        return ImmutableTransactionRequest.builder()
+                .amount(transaction.getAmount())
+                .type(transaction.getType())
+                .parentId(Optional.ofNullable(transaction.getParentId()))
+                .build();
+    }
 }

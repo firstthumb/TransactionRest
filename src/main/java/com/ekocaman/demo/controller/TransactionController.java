@@ -44,9 +44,9 @@ public class TransactionController {
 
         LOG.info("Get transaction by Id request got with Transaction Id : {}", transactionId);
 
-        // TODO: Implement
+        Transaction transaction = transactionService.findByTransactionId(transactionId);
 
-        return null;
+        return TransactionRequest.withTransaction(transaction);
     }
 
     @RequestMapping(value = "/types/{type}", method = RequestMethod.GET)
@@ -54,9 +54,7 @@ public class TransactionController {
 
         LOG.info("Get transaction by type request got with Type : {}", type);
 
-        // TODO: Implement
-
-        return null;
+        return transactionService.findTransactionIdsByTransactionType(type);
     }
 
     @RequestMapping(value = "/sum/{parentId}", method = RequestMethod.GET)
@@ -64,8 +62,10 @@ public class TransactionController {
 
         LOG.info("Get sum of amounts request got with Parent Id : {}", parentId);
 
-        // TODO: Implement
+        double sum = transactionService.findSumOfTransactionAmountsByParentId(parentId);
 
-        return null;
+        return ImmutableSumResponse.builder()
+                .sum(sum)
+                .build();
     }
 }
