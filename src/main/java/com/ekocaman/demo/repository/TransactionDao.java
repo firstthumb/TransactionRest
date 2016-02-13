@@ -51,9 +51,28 @@ public class TransactionDao {
     public double findSumOfTransactionAmountsByParentId(Long parentId) {
         LOG.info("Finding sum of transaction amount by parentId : {}", parentId);
 
-        // TODO: Implement
+        Objects.requireNonNull(parentId, "Parent Id cannot be null");
 
-        return 0D;
+        Transaction parentTransaction = transactions.get(parentId);
+
+        BigDecimal totalSum = traverse(parentId).add(new BigDecimal(parentTransaction.getAmount()));
+
+        return totalSum.doubleValue();
+    }
+
+    private BigDecimal traverse(Long parentId) {
+        LOG.info("Looking for parent Id : {}", parentId);
+        BigDecimal sum = BigDecimal.ZERO;
+
+        for (Transaction transaction : transactions.values()) {
+            if (transaction.getParentId() != null
+                    && transaction.getParentId().equals(parentId)) {
+                sum = sum.add(new BigDecimal(transaction.getAmount()));
+                sum = sum.add(traverse(transaction.getTransactionId()));
+            }
+        }
+
+        return sum;
     }
 
     public Transaction findTransactionById(Long transactionId) {

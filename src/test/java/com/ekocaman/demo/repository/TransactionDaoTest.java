@@ -220,4 +220,32 @@ public class TransactionDaoTest {
     }
 
     //endregion
+
+    //region SUM OF AMOUNTS
+    @Test
+    public void sumOfParentTransaction1Successfully() {
+        double sum = transactionDao.findSumOfTransactionAmountsByParentId(1L);
+
+        assertThat(sum, is(38d));
+    }
+
+    @Test
+    public void sumOfParentTransaction4Successfully() {
+        double sum = transactionDao.findSumOfTransactionAmountsByParentId(4L);
+
+        assertThat(sum, is(1d));
+    }
+
+    @Test
+    public void sumOfParentTransaction3Successfully() {
+        double sum = transactionDao.findSumOfTransactionAmountsByParentId(3L);
+
+        assertThat(sum, is(7d));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void sumOfParentTransactionWithNullParameter() {
+        transactionDao.findSumOfTransactionAmountsByParentId(null);
+    }
+    //endregion
 }
