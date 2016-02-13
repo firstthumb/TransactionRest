@@ -145,4 +145,43 @@ public class TransactionDaoTest {
     }
 
     //endregion
+
+    //region FIND TRANSACTION BY TYPE
+
+    @Test
+    public void findTransactionByTypeSuccessfully() {
+        // Prepare data for test
+        for (long i = 100; i < 110; i++) {
+            Transaction transaction = Transaction.builder()
+                    .transactionId(i)
+                    .amount(2D)
+                    .type("cloud")
+                    .build();
+            transactionDao.saveTransaction(transaction);
+        }
+
+        List<Long> transactionIds = transactionDao.findTransactionIdsByTransactionType("cloud");
+
+        assertThat(transactionIds, is(notNullValue()));
+        assertThat(transactionIds, is(not(emptyIterable())));
+        for (int i = 0; i < 10; i++) {
+            Long transactionId = transactionIds.get(i);
+            assertThat(transactionId, is((long) (100 + i)));
+        }
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void findTransactionByNullTypeAndFails() {
+        transactionDao.findTransactionIdsByTransactionType(null);
+    }
+
+    @Test
+    public void findTransactionByTypeAndReturnsEmptyResultSuccessfully() {
+        List<Long> transactionIds = transactionDao.findTransactionIdsByTransactionType("unknown");
+
+        assertThat(transactionIds, is(notNullValue()));
+        assertThat(transactionIds, is(emptyIterable()));
+    }
+
+    //endregion
 }
