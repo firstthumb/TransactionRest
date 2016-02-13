@@ -33,9 +33,10 @@ public class TransactionController {
 
         LOG.info("Save transaction request got with Transaction Id : {} and Transaction Request : {}", transactionId, transactionRequest);
 
-        // TODO: Implement
+        Transaction transaction = Transaction.withTransactionRequest(transactionId, transactionRequest);
+        boolean isSuccess = transactionService.saveTransaction(transaction);
 
-        return null;
+        return ImmutableStatusResponse.builder().status(isSuccess ? "ok" : "error").build();
     }
 
     @RequestMapping(value = "/transaction/{transactionId}", method = RequestMethod.GET)
