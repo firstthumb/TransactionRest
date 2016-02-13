@@ -3,8 +3,6 @@ package com.ekocaman.demo.service;
 import com.ekocaman.demo.config.AppConfig;
 import com.ekocaman.demo.model.Transaction;
 import com.ekocaman.demo.repository.TransactionDao;
-import com.ekocaman.demo.request.ImmutableTransactionRequest;
-import com.ekocaman.demo.request.TransactionRequest;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
