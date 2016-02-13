@@ -2,10 +2,7 @@ package com.ekocaman.demo.controller;
 
 import com.ekocaman.demo.model.Transaction;
 import com.ekocaman.demo.request.TransactionRequest;
-import com.ekocaman.demo.response.ImmutableStatusResponse;
-import com.ekocaman.demo.response.ImmutableSumResponse;
-import com.ekocaman.demo.response.StatusResponse;
-import com.ekocaman.demo.response.SumResponse;
+import com.ekocaman.demo.response.*;
 import com.ekocaman.demo.service.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,13 +37,13 @@ public class TransactionController {
     }
 
     @RequestMapping(value = "/transaction/{transactionId}", method = RequestMethod.GET)
-    public TransactionRequest getTransactionById(@PathVariable("transactionId") Long transactionId) {
+    public TransactionResponse getTransactionById(@PathVariable("transactionId") Long transactionId) {
 
         LOG.info("Get transaction by Id request got with Transaction Id : {}", transactionId);
 
         Transaction transaction = transactionService.findByTransactionId(transactionId);
 
-        return TransactionRequest.withTransaction(transaction);
+        return ImmutableTransactionResponse.withTransaction(transaction);
     }
 
     @RequestMapping(value = "/types/{type}", method = RequestMethod.GET)

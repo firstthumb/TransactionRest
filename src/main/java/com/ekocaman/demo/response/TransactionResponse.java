@@ -1,6 +1,6 @@
 package com.ekocaman.demo.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ekocaman.demo.model.Transaction;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
@@ -10,14 +10,19 @@ import java.util.Optional;
 @Value.Immutable
 @JsonSerialize(as = ImmutableTransactionResponse.class)
 @JsonDeserialize(as = ImmutableTransactionResponse.class)
-public interface TransactionResponse {
+public abstract class TransactionResponse {
 
-    @JsonProperty("amount")
-    public Double getAmount();
+    public abstract Double getAmount();
 
-    @JsonProperty("type")
-    public String getType();
+    public abstract String getType();
 
-    @JsonProperty("parent_id")
-    public Optional<Long> getParentId();
+    public abstract Optional<Long> getParentId();
+
+    public static ImmutableTransactionResponse withTransaction(Transaction transaction) {
+        return ImmutableTransactionResponse.builder()
+                .amount(transaction.getAmount())
+                .type(transaction.getType())
+                .parentId(Optional.ofNullable(transaction.getParentId()))
+                .build();
+    }
 }

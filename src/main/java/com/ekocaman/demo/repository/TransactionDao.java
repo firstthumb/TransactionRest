@@ -64,7 +64,7 @@ public class TransactionDao {
 
         Transaction parentTransaction = transactions.get(parentId);
 
-        BigDecimal totalSum = traverse(parentId).add(new BigDecimal(parentTransaction.getAmount()));
+        BigDecimal totalSum = traverse(parentId).add(new BigDecimal(String.valueOf(parentTransaction.getAmount())));
 
         return totalSum.doubleValue();
     }
@@ -76,7 +76,7 @@ public class TransactionDao {
         for (Transaction transaction : transactions.values()) {
             if (transaction.getParentId() != null
                     && transaction.getParentId().equals(parentId)) {
-                sum = sum.add(new BigDecimal(transaction.getAmount()));
+                sum = sum.add(new BigDecimal(String.valueOf(transaction.getAmount())));
                 sum = sum.add(traverse(transaction.getTransactionId()));
             }
         }
