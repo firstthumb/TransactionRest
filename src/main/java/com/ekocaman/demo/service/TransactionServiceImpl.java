@@ -25,35 +25,41 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean saveTransaction(Transaction transaction) {
         LOG.info("Saving transaction ==> {}", transaction);
 
-        // TODO: Implement
+        Objects.requireNonNull(transaction, "Transaction cannot be null");
 
-        return true;
+        boolean isSuccess = transactionDao.saveTransaction(transaction);
+        LOG.info("Save transaction result : {}", isSuccess);
+
+        return isSuccess;
     }
 
     @Override
     public Transaction findByTransactionId(Long transactionId) {
         LOG.info("Finding transaction by Id : {}", transactionId);
 
-        // TODO: Implement
+        Objects.requireNonNull(transactionId, "TransactionID cannot be null");
 
-        return null;
+        Transaction transaction = transactionDao.findTransactionById(transactionId);
+        LOG.info("Transaction found : {}", transaction);
+
+        return transaction;
     }
 
     @Override
     public List<Long> findTransactionIdsByTransactionType(String type) {
         LOG.info("Finding transaction ids by type : {}", type);
 
-        // TODO: Implement
+        Objects.requireNonNull(type, "Transaction type cannot be null");
 
-        return null;
+        return transactionDao.findTransactionIdsByTransactionType(type);
     }
 
     @Override
     public double findSumOfTransactionAmountsByParentId(Long parentId) {
         LOG.info("Sum of transaction amounts by parent Id : {}", parentId);
 
-        // TODO: Implement
+        Objects.requireNonNull(parentId, "ParentID cannot be null");
 
-        return 0D;
+        return transactionDao.findSumOfTransactionAmountsByParentId(parentId);
     }
 }
