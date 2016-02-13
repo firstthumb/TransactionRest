@@ -34,9 +34,18 @@ public class TransactionDao {
     public List<Long> findTransactionIdsByTransactionType(String transactionType) {
         LOG.info("Finding transaction by type : {}", transactionType);
 
-        // TODO: Implement
+        Objects.requireNonNull(transactionType, "Transaction type cannot be null");
 
-        return null;
+        List<Long> result = transactions
+                .values()
+                .stream()
+                .filter(t -> t.getType().equals(transactionType))
+                .map(Transaction::getTransactionId)
+                .collect(Collectors.toList());
+
+        LOG.info("Result size : {}", result.size());
+
+        return result;
     }
 
     public double findSumOfTransactionAmountsByParentId(Long parentId) {
@@ -50,9 +59,12 @@ public class TransactionDao {
     public Transaction findTransactionById(Long transactionId) {
         LOG.info("Finding transaction by id : {}", transactionId);
 
-        // TODO: Implement
+        Objects.requireNonNull(transactionId, "Transaction Id cannot be null");
 
-        return null;
+        Transaction transaction = transactions.get(transactionId);
+        LOG.info("Transaction found : {}", transaction);
+
+        return transaction;
     }
 
     public void clear() {
