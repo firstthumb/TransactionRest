@@ -1,5 +1,6 @@
 package com.ekocaman.demo.repository;
 
+import com.ekocaman.demo.exc.InvalidParameterException;
 import com.ekocaman.demo.model.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,14 @@ public class TransactionDao {
         Objects.requireNonNull(transaction.getTransactionId(), "TransactionID cannot be null");
         Objects.requireNonNull(transaction.getAmount(), "Amount cannot be null");
         Objects.requireNonNull(transaction.getType(), "Type cannot be null");
+
+        if (transaction.getParentId() != null) {
+            Transaction parentTransaction = transactions.get(transaction.getParentId());
+            if (parentTransaction == null) {
+                LOG.warn("Parent transaction {} could not be found", transaction.getTransactionId());
+                throw new InvalidParameterException("ParentId could not be found");
+            }
+        }
 
         transactions.put(transaction.getTransactionId(), transaction);
 

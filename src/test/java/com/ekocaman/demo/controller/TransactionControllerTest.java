@@ -22,6 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,6 +54,8 @@ public class TransactionControllerTest {
         transactionDao.clear();
     }
 
+    //region SAVE TRANSACTION
+
     @Test
     public void saveTransactionSuccessfully() throws Exception {
         Long transactionId = 10L;
@@ -72,6 +75,106 @@ public class TransactionControllerTest {
 
         assertThat(response, is(notNullValue()));
     }
+
+    @Test
+    public void saveTransactionAndOverwriteSuccessfully() throws Exception {
+        Long transactionId = 10L;
+        String url = String.format("/transactionservice/transaction/%s", transactionId);
+
+        {
+            TransactionRequest request = ImmutableTransactionRequest.builder()
+                    .amount(10D)
+                    .type("cars")
+                    .build();
+
+            String response = mvc.perform(put(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value(is("ok")))
+                    .andReturn().getResponse().getContentAsString();
+
+            assertThat(response, is(notNullValue()));
+        }
+
+        {
+            TransactionRequest request = ImmutableTransactionRequest.builder()
+                    .amount(20D)
+                    .type("bikes")
+                    .build();
+
+            String response = mvc.perform(put(url)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(mapper.writeValueAsString(request)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.status").value(is("ok")))
+                    .andReturn().getResponse().getContentAsString();
+
+            assertThat(response, is(notNullValue()));
+        }
+
+        Transaction transaction = transactionDao.findTransactionById(transactionId);
+
+        assertThat(transaction.getAmount(), is(20D));
+        assertThat(transaction.getType(), is("bikes"));
+        assertThat(transaction.getParentId(), is(nullValue()));
+
+        transactionDao.clear();
+    }
+
+    @Test
+    public void saveTransactionWithoutAmountFail() throws Exception {
+        Long transactionId = 10L;
+        String url = String.format("/transactionservice/transaction/%s", transactionId);
+
+        String payload = "{ \"type\": \"cars\" }";
+
+        String response = mvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+                .andExpect(status().is4xxClientError())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(response, is(notNullValue()));
+    }
+
+    @Test
+    public void saveTransactionWithoutTypeFail() throws Exception {
+        Long transactionId = 10L;
+        String url = String.format("/transactionservice/transaction/%s", transactionId);
+
+        String payload = "{ \"amount\": 5000 }";
+
+        String response = mvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+                .andExpect(status().is4xxClientError())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(response, is(notNullValue()));
+    }
+
+    @Test
+    public void saveTransactionWithNonExistingParentIdSuccessfully() throws Exception {
+        Long transactionId = 10L;
+        String url = String.format("/transactionservice/transaction/%s", transactionId);
+
+        TransactionRequest request = ImmutableTransactionRequest.builder()
+                .amount(10D)
+                .type("cars")
+                .parentId(Long.MAX_VALUE)
+                .build();
+
+        String response = mvc.perform(put(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)))
+                .andExpect(status().is4xxClientError())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(response, is(notNullValue()));
+    }
+
+    //endregion
 
     @Test
     public void getTransactionByTypeSuccessfully() throws Exception {
