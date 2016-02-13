@@ -184,4 +184,40 @@ public class TransactionDaoTest {
     }
 
     //endregion
+
+    //region FIND TRANSACTION BY ID
+
+    @Test
+    public void findTransactionByIdSuccessfully() {
+        Transaction transaction = Transaction.builder()
+                .transactionId(11L)
+                .amount(2D)
+                .type("cars")
+                .build();
+
+        transactionDao.saveTransaction(transaction);
+
+        Transaction savedTransaction = transactionDao.findTransactionById(transaction.getTransactionId());
+
+        assertThat(savedTransaction, is(notNullValue()));
+        assertThat(savedTransaction.getTransactionId(), is(transaction.getTransactionId()));
+        assertThat(savedTransaction.getAmount(), is(transaction.getAmount()));
+        assertThat(savedTransaction.getType(), is(transaction.getType()));
+        assertThat(savedTransaction.getParentId(), is(transaction.getParentId()));
+        assertThat(savedTransaction, is(transaction));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void findTransactionByNullIdAndFails() {
+        transactionDao.findTransactionById(null);
+    }
+
+    @Test
+    public void findTransactionByIdAndReturnsNullSuccessfully() {
+        Transaction noTransaction = transactionDao.findTransactionById(Long.MAX_VALUE);
+
+        assertThat(noTransaction, is(nullValue()));
+    }
+
+    //endregion
 }
