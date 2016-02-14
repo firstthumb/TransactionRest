@@ -48,6 +48,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.16.6</version>
@@ -103,4 +109,75 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>env</name>
+                    <value>dev</value>
+                </property>
+            </activation>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>prod</value>
+                </property>
+            </activation>
+        </profile>
+        <profile>
+            <id>load</id>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>load</value>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-all</artifactId>
+                    <version>2.1.9</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.codehaus.groovy.modules.http-builder</groupId>
+                    <artifactId>http-builder</artifactId>
+                    <version>0.7.1</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.codehaus.groovy</groupId>
+                    <artifactId>groovy-json</artifactId>
+                    <version>2.4.5</version>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.gmaven</groupId>
+                        <artifactId>gmaven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>run-groovy</id>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <phase>package</phase>
+                                <configuration>
+                                    <providerSelection>2.0</providerSelection>
+                                    <source>2.0</source>
+                                    <source>${project.basedir}/src/test/script/loadtest.groovy</source>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

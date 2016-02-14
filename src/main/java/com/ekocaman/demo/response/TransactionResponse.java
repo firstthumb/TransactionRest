@@ -5,8 +5,9 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.sun.istack.internal.Nullable;
 import org.immutables.value.Value;
+
+import javax.annotation.Nullable;
 
 @Value.Immutable
 @JsonSerialize(as = ImmutableTransactionResponse.class)
